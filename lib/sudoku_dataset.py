@@ -26,6 +26,7 @@ sudoku_dataset = [
             []        
         ]
     },
+    
     # data 2 - difficulty Easy
     {
         "initial_state": [
@@ -51,6 +52,7 @@ sudoku_dataset = [
             []        
         ]
     },
+
     # data 3 - difficulty Easy
     {
         "initial_state": [
@@ -76,6 +78,7 @@ sudoku_dataset = [
             []        
         ]
     },
+
     # data 4 - difficulty Medium
     {
         "initial_state": [
@@ -101,6 +104,8 @@ sudoku_dataset = [
             []        
         ]
     },
+
+    # data 5 - difficulty Medium
     {
         "initial_state": [
             [],
@@ -125,6 +130,8 @@ sudoku_dataset = [
             []        
         ]
     },
+
+    # data 6 - difficulty Medium
     {
         "initial_state": [
             [],
@@ -149,6 +156,8 @@ sudoku_dataset = [
             []        
         ]
     },
+
+    # data 7 - difficulty Hard
     {
         "initial_state": [
             [],
@@ -173,6 +182,8 @@ sudoku_dataset = [
             []        
         ]
     },
+
+    # data 8 - difficulty Hard
     {
         "initial_state": [
             [],
@@ -197,6 +208,8 @@ sudoku_dataset = [
             []        
         ]
     },
+
+    # data 9 - difficulty Hard
     {
         "initial_state": [
             [],
@@ -221,6 +234,216 @@ sudoku_dataset = [
             []        
         ]
     },
+
+    # data 10 - difficulty Expert
+    {
+        "initial_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ],
+        "goal_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []        
+        ]
+    },
+
+    # data 11 - difficulty Expert
+    {
+        "initial_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ],
+        "goal_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []        
+        ]
+    },
+
+    # data 12 - difficulty Expert
+    {
+        "initial_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ],
+        "goal_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []        
+        ]
+    },
+
+    # data 13 - difficulty Master
+    {
+        "initial_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ],
+        "goal_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []        
+        ]
+    },
+
+    # data 14 - difficulty Master
+    {
+        "initial_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ],
+        "goal_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []        
+        ]
+    },
+
+    # data 15 - difficulty Master
+    {
+        "initial_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ],
+        "goal_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []        
+        ]
+    },
+
+    # data 16 - difficulty Extreme
+    {
+        "initial_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ],
+        "goal_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []        
+        ]
+    },
+
+    # data 17 - difficulty Extreme
+    {
+        "initial_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ],
+        "goal_state": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []        
+        ]
+    },
+
+    # data 18 - difficulty Extreme
     {
         "initial_state": [
             [],
