@@ -7,6 +7,10 @@ class Solution():
         with open(os.path.join(os.path.dirname(__file__), "sudoku_dataset.json")) as f:
             self.dataset = json.load(f)
         
+        self.total_path_length = 0
+        self.total_complete_solve = 0
+        self.total_incomplete_solve = 0
+        
 
     # return (x, y) of an empty cell from the board. returns (-1, -1) if no empty cell
     def get_next_empty_cell(self, board: list[list[int]]) -> tuple[int, int]:
