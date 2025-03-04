@@ -37,4 +37,5 @@ class DFS(Solution):
         # none of the numbers attempted are valid, search failed
         return False
 
-DFS().start()
+if __name__ == "__main__":
+    DFS().start()
