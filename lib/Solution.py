@@ -8,7 +8,6 @@ class Solution():
             self.dataset = json.load(f)
         
 
-
     # return (x, y) of an empty cell from the board. returns (-1, -1) if no empty cell
     def get_next_empty_cell(self, board: list[list[int]]) -> tuple[int, int]:
         for y, row in enumerate(board):
@@ -16,7 +15,6 @@ class Solution():
                 if value == 0:
                     return x, y
         return -1, -1
-
 
 
     # check if a number is legal in the position

@@ -1,17 +1,16 @@
+from lib.benchmark import time_benchmark
 from lib.Solution import Solution
-
 class DFS(Solution):
     def __init__(self):
         self.times = 0
         super().__init__()
 
 
-
+    @time_benchmark
     def start(self):
-        solving_board = self.dataset[0]["initial_state"]
+        solving_board = self.dataset[17]["initial_state"]
         success = self.recursive_attempt(solving_board)
         print(f"is successful: {success}")
-
 
 
     def recursive_attempt(self, board):
