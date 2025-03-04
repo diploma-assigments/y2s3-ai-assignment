@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 
@@ -6,33 +7,41 @@ class Solution():
         with open(os.path.join(os.path.dirname(__file__), "sudoku_dataset.json")) as f:
             self.dataset = json.load(f)
         
+
+
+    # return (x, y) of an empty cell from the board. returns (-1, -1) if no empty cell
+    def get_next_empty_cell(self, board: list[list[int]]) -> tuple[int, int]:
+        for y, row in enumerate(board):
+            for x, value in enumerate(row):
+                if value == 0:
+                    return x, y
+        return -1, -1
+
+
+
     # check if a number is legal in the position
-    def sudoku_validation(self, board: list[list[int]], x: int, y: int):
-        # for storing checked values
-        _ = set()
+    def validate_sudoku_cell(self, board: list[list[int]], x: int, y: int) -> bool:
+        # copy from reference
+        board_copy = copy.deepcopy(board)
+
+        # get cell num out of board
+        num = 0
+        num, board_copy[y][x] = board_copy[y][x], num
 
         # check x axis
-        for value in board[y]:
-            if value != 0 and value in _:
-                return False
-            _.add(value)
-
-        _.clear()
+        if (num in board_copy[y]):
+             return False
 
         #check y axis
-        for i in range(9):
-            if board[i][x] != 0 and board[i][x] in _:
-                return False
-            _.add(board[i][x])
-
-        _.clear()
+        if (num in [board_copy[i][x] for i in range(9)]):
+            return False
 
         #check within box 
-        box_root = { "x": (x // 3) * 3, "y": (y // 3) * 3 }
-        for i in range (box_root["y"], box_root["y"] + 3):
-            for j in range(box_root["x"], box_root["x"] + 3):
-                if board[y][x] != 0 and board[y][x] in _: 
+        box_start_x = (x // 3) * 3
+        box_start_y = (y // 3) * 3
+        for i in range(box_start_y, box_start_y + 3):
+            for j in range(box_start_x, box_start_x + 3):
+                if board_copy[i][j] == num:
                     return False
-                _.add(board[i][x])       
 
         return True
