@@ -48,11 +48,8 @@ class DFS(Solution):
                     path_length = new_path_length + 1
             else:
                 #backtrack immediately and try another number for the cell
+                board[y][x] = 0
                 path_length += 1
-
-        # print('=========================')
-        # for row in board:
-        #     print(row)
 
         # none of the numbers attempted are valid, search failed
         return False, path_length
