@@ -1,36 +1,61 @@
 import copy
 import json
 import os
+import threading
+
+from abc import abstractmethod
 
 class SearchAlgorithm():
-    def __init__(self, id, initial_state, goal_state):
-        self.id = id
-        self.initial_state = initial_state
-        self.goal_state = goal_state
-        self.path_length = 0
-        self.completed = None
-        self.time_taken = None
+    _threads = []
+
+    def __init__(self, id: int, initial_state: list[list[int]], goal_state: list[list[int]]):
+        self.id: int = id
+        self.current_state: list[list[int]] = initial_state
+        self.goal_state: list[list[int]] = goal_state
+        self.path_length: int = 0
+        self.completed: bool = None
+        self.time_seconds_taken: float = None    
 
 
     @classmethod
-    def get_sudoku_dataset():
+    def get_sudoku_dataset(cls):
         with open(os.path.join(os.path.dirname(__file__), "sudoku_dataset.json")) as f:
             return json.load(f)
+        
+    
+    @classmethod
+    def wait_for_all_solves(cls):
+        for thread in cls._threads:
+            thread.join()
+        
+        print(f"{cls.__name__} search algorithm finished running!")
+        
+
+    @abstractmethod
+    def _search(self):
+        pass
 
 
-    # return (x, y) of an empty cell from the board. returns (-1, -1) if no empty cell
-    def get_next_empty_cell(self, board: list[list[int]]) -> tuple[int, int]:
-        for y, row in enumerate(board):
+    def solve(self):
+        # TODO: time_taken stuff
+        t = threading.Thread(target=self._search, daemon=True)
+        t.start()
+        SearchAlgorithm._threads.append(t)
+
+
+    def _get_next_empty_cell(self) -> tuple[int, int]:
+        """Returns (x, y) of an empty cell from the board. Returns (-1, -1) if no empty cell."""
+        for y, row in enumerate(self.current_state):
             for x, value in enumerate(row):
                 if value == 0:
                     return x, y
         return -1, -1
 
 
-    # check if a number is legal in the position
-    def validate_sudoku_cell(self, board: list[list[int]], x: int, y: int) -> bool:
+    def _validate_sudoku_cell(self, x: int, y: int) -> bool:
+        """Check if a number is legal in the position."""
         # copy from reference
-        board_copy = copy.deepcopy(board)
+        board_copy = copy.deepcopy(self.current_state)
 
         # get cell num out of board
         num = 0
