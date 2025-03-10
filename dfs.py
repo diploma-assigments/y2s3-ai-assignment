@@ -23,19 +23,14 @@ class DFS(SearchAlgorithm):
             self.current_state[y][x] = i
             self.path_length += 1
 
-            if self._validate_sudoku_cell(x, y):
-                # legal, continue with next layer of recursion
-                if self._search():
-                    # backtracked, found a solution, end the recursion stack
-                    return True
-                else:
-                    # backtracked, no solution found, try another number for the cell
-                    self.current_state[y][x] = 0
-                    self.path_length += 1
-            else:
-                #move not legal, backtrack immediately and try another number for the cell
-                self.current_state[y][x] = 0
-                self.path_length += 1
+            # if move is valid, continue with recursion. 
+            if self._validate_sudoku_cell(x, y) and self._search():
+                # solution found down this path, exiting the recursion stack
+                return True
+                
+            #move not legal, backtrack and try another number for the cell
+            self.current_state[y][x] = 0
+            self.path_length += 1
 
         # none of the numbers attempted are valid, search failed
         return False
