@@ -15,7 +15,6 @@ class DFS(Solution):
     def solve_sudoku(self, id, data):
         completed, path_length = self.recursive_attempt(data["initial_state"], 0)
         if completed:
-            # TODO: compare with goal state?
             self.total_path_length += path_length
             self.total_complete_solve += 1
             print(f"Sudoku #{id} completed with {path_length} steps")
@@ -25,11 +24,14 @@ class DFS(Solution):
 
 
 
-    def recursive_attempt(self, board, path_length):
+    def recursive_attempt(self, board, path_length, goal_state):
         x, y = self.get_next_empty_cell(board)
 
         # no more empty cells
         if x == -1 and y == -1:
+            # if answer found is not the same as goal_state, backtrack and find another answer
+            if (board != goal_state): return False, path_length
+            # accept the answer
             return True, path_length
         
         # attempt from 1 - 9
