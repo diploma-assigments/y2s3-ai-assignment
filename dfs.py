@@ -1,60 +1,49 @@
 from lib.benchmark import time_benchmark
-from lib.Solution import Solution
+from lib.SearchAlgorithm import SearchAlgorithm
 
-class DFS(Solution):
-    def __init__(self):
-        super().__init__()
-
-
-    @time_benchmark
-    def start(self):
-        for i, data in enumerate(self.dataset):
-            self.solve_sudoku(i + 1, data)
+class DFS(SearchAlgorithm):
+    def __init__(self, id, initial_state, goal_state):
+        super().__init__(id, initial_state, goal_state)
 
 
-    def solve_sudoku(self, id, data):
-        completed, path_length = self.recursive_attempt(data["initial_state"], 0)
-        if completed:
-            self.total_path_length += path_length
-            self.total_complete_solve += 1
-            print(f"Sudoku #{id} completed with {path_length} steps")
-        else:
-            self.total_incomplete_solve += 1
-            print(f"Sudoku #{id} did not complete with {path_length} steps")
-
-
-
-    def recursive_attempt(self, board, path_length, goal_state):
-        x, y = self.get_next_empty_cell(board)
+    def _search(self):
+        x, y = self._get_next_empty_cell()
 
         # no more empty cells
         if x == -1 and y == -1:
-            # if answer found is not the same as goal_state, backtrack and find another answer
-            if (board != goal_state): return False, path_length
-            # accept the answer
-            return True, path_length
+            if (self.current_state != self.goal_state): 
+                # if answer found is not the same as goal_state, backtrack and find another answer
+                return False
+            else:
+                # accept the answer
+                self.completed = True
+                return True
         
         # attempt from 1 - 9
         for i in range(1, 10):
-            board[y][x] = i
-            path_length += 1
+            self.current_state[y][x] = i
+            self.path_length += 1
 
-            if self.validate_sudoku_cell(board, x, y):
-                # if is legal, continue the path
-                solved, new_path_length = self.recursive_attempt(board, path_length)
-                if solved:
-                    return True, new_path_length
-                else:
-                    # backtracked from future path, try another number for the cell
-                    board[y][x] = 0
-                    path_length = new_path_length + 1
-            else:
-                #backtrack immediately and try another number for the cell
-                board[y][x] = 0
-                path_length += 1
+            # if move is valid, continue with recursion. 
+            if self._validate_sudoku_cell(x, y) and self._search():
+                # solution found down this path, exiting the recursion stack
+                return True
+                
+            #move not legal, backtrack and try another number for the cell
+            self.current_state[y][x] = 0
+            self.path_length += 1
 
         # none of the numbers attempted are valid, search failed
-        return False, path_length
+        return False
+
+
+def main():
+    sudoku_dataset = DFS.get_sudoku_dataset()
+    for data in sudoku_dataset:
+        DFS(data["id"], data["initial_state"], data["goal_state"])
+
+    DFS.solve_all()
+
 
 if __name__ == "__main__":
-    DFS().start()
+    main()
