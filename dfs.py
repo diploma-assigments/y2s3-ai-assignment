@@ -16,6 +16,7 @@ class DFS(SearchAlgorithm):
                 return False
             else:
                 # accept the answer
+                self.completed = True
                 return True
         
         # attempt from 1 - 9
@@ -37,11 +38,11 @@ class DFS(SearchAlgorithm):
 
 
 def main():
-    sudoku_dataset = SearchAlgorithm.get_sudoku_dataset()
+    sudoku_dataset = DFS.get_sudoku_dataset()
     for data in sudoku_dataset:
-        DFS(data["id"], data["initial_state"], data["goal_state"]).solve()
+        DFS(data["id"], data["initial_state"], data["goal_state"])
 
-    SearchAlgorithm.wait_for_all_solves()
+    DFS.solve_all()
 
 
 if __name__ == "__main__":

@@ -1,46 +1,57 @@
+import atexit
 import copy
 import json
 import os
-import threading
+import concurrent.futures
 
 from abc import abstractmethod
 
 class SearchAlgorithm():
-    _threads = []
+    _problems: list["SearchAlgorithm"] = [] # TEMP?
+    _futures = [] # TEMP?
 
     def __init__(self, id: int, initial_state: list[list[int]], goal_state: list[list[int]]):
         self.id: int = id
         self.current_state: list[list[int]] = initial_state
         self.goal_state: list[list[int]] = goal_state
         self.path_length: int = 0
-        self.completed: bool = None
-        self.time_seconds_taken: float = None    
+        self.completed: bool = False
+        self.time_seconds_taken: float = 0    
+
+        SearchAlgorithm._problems.append(self)
 
 
     @classmethod
     def get_sudoku_dataset(cls):
+        """Get sudoku dataset (id, initial_state, goal_state)."""
         with open(os.path.join(os.path.dirname(__file__), "sudoku_dataset.json")) as f:
             return json.load(f)
         
-    
+
     @classmethod
-    def wait_for_all_solves(cls):
-        for thread in cls._threads:
-            thread.join()
-        
-        print(f"{cls.__name__} search algorithm finished running!")
-        
+    def _log_problem_future_status(cls, future):
+        # TODO: make thread-safe + improve this shit
+        os.system("cls")
+        for problem in cls._problems:
+            print(f"#{problem.id} is: {problem.completed}")
+
+    @classmethod
+    def solve_all(cls):
+        """Run all problems with multiple threads, this function will block until all problems are solved."""
+        with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as executor:
+            atexit.register(lambda: executor.shutdown(wait=False))
+
+            for problem in cls._problems:    
+                future = executor.submit(problem._search)
+                future.add_done_callback(cls._log_problem_future_status)
+
+                cls._futures.append(future)
+
 
     @abstractmethod
     def _search(self):
+        """Your main entry point for search algorithm implementation."""
         pass
-
-
-    def solve(self):
-        # TODO: time_taken stuff
-        t = threading.Thread(target=self._search, daemon=True)
-        t.start()
-        SearchAlgorithm._threads.append(t)
 
 
     def _get_next_empty_cell(self) -> tuple[int, int]:
@@ -63,7 +74,7 @@ class SearchAlgorithm():
 
         # check x axis
         if (num in board_copy[y]):
-             return False
+            return False
 
         #check y axis
         if (num in [board_copy[i][x] for i in range(9)]):
