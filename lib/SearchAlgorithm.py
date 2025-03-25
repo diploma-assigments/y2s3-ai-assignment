@@ -3,12 +3,14 @@ import copy
 import json
 import os
 import concurrent.futures
+import threading
 
 from abc import abstractmethod
 
 class SearchAlgorithm():
     _problems: list["SearchAlgorithm"] = [] # TEMP?
     _futures = [] # TEMP?
+    _threading_lock = threading.Lock()
 
     def __init__(self, id: int, initial_state: list[list[int]], goal_state: list[list[int]]):
         self.id: int = id
@@ -31,9 +33,13 @@ class SearchAlgorithm():
     @classmethod
     def _log_problem_future_status(cls, future):
         # TODO: make thread-safe + improve this shit
-        os.system("cls")
-        for problem in cls._problems:
-            print(f"#{problem.id} is: {problem.completed}")
+        with cls._threading_lock:
+            message = ""
+            for problem in cls._problems:
+                message += f"#{problem.id} is {"✅" if problem.completed else "❌"}\n"
+            os.system("cls")
+            print(message)
+
 
     @classmethod
     def solve_all(cls):
