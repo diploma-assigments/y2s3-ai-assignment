@@ -9,7 +9,7 @@ from abc import abstractmethod
 
 class SearchAlgorithm():
     _problems: list["SearchAlgorithm"] = [] # TEMP?
-    _futures = [] # TEMP?
+    _threads = []
     _threading_lock = threading.Lock()
 
     def __init__(self, id: int, initial_state: list[list[int]], goal_state: list[list[int]]):
@@ -31,8 +31,12 @@ class SearchAlgorithm():
         
 
     @classmethod
-    def _log_problem_future_status(cls, future):
-        # TODO: make thread-safe + improve this shit
+    def _problem_threading_wrapper(cls, problem):
+        problem._search()
+        cls._print_threading_status()
+
+    @classmethod
+    def _print_threading_status(cls):
         with cls._threading_lock:
             message = ""
             for problem in cls._problems:
@@ -44,15 +48,18 @@ class SearchAlgorithm():
     @classmethod
     def solve_all(cls):
         """Run all problems with multiple threads, this function will block until all problems are solved."""
-        with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as executor:
-            atexit.register(lambda: executor.shutdown(wait=False))
-
-            for problem in cls._problems:    
-                future = executor.submit(problem._search)
-                future.add_done_callback(cls._log_problem_future_status)
-
-                cls._futures.append(future)
-
+        for problem in cls._problems:
+            t = threading.Thread(target=cls._problem_threading_wrapper, args=(problem,), daemon=True)
+            t.start()
+            cls._threads.append(t)
+        
+        try:
+            for t in cls._threads:
+                t.join()  # Wait for each thread to finish
+        except KeyboardInterrupt:
+            print("\nKeyboardInterrupt detected! Exiting...")
+            return
+        
 
     @abstractmethod
     def _search(self):
