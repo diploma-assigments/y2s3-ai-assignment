@@ -1,0 +1,115 @@
+import random
+from time import time
+from lib.SearchAlgorithm import SearchAlgorithm
+
+class MinConflict(SearchAlgorithm):
+    MAX_STEPS = 10000  # can adjust based on problem complexity
+
+    def _search(self):
+        start_time = time()
+        self.completed = False
+        self.path_length = 0
+
+        # Fill initial empty cells without conflicting fixed cells
+        if not self._fill_initial_empty_cells():
+            self.time_seconds_taken = time() - start_time
+            return
+
+        step = 0
+        while step < self.MAX_STEPS:
+            if self._is_solved():
+                self.completed = True
+                self.path_length = step
+                break
+
+            conflicting_cells = self._get_conflicting_cells()
+            if not conflicting_cells:
+                self.completed = True
+                self.path_length = step
+                break
+
+            # Select a random conflicting cell
+            x, y = random.choice(conflicting_cells)
+
+            # Find value with minimum conflicts
+            current_value = self.current_state[y][x]
+            possible_values = self._get_possible_values(x, y)
+            if not possible_values:
+                break  # No possible values, unsolvable
+
+            min_conflict = float('inf')
+            best_value = current_value
+            for num in possible_values:
+                self.current_state[y][x] = num
+                conflict_count = self._count_conflicts(x, y)
+                if conflict_count < min_conflict or (conflict_count == min_conflict and random.random() < 0.5):
+                    min_conflict = conflict_count
+                    best_value = num
+            self.current_state[y][x] = best_value
+            step += 1
+
+        self.time_seconds_taken = time() - start_time
+        self.path_length = step
+
+    def _fill_initial_empty_cells(self):
+        for y in range(9):
+            for x in range(9):
+                if self.initial_state[y][x] == 0:
+                    possible = []
+                    for num in range(1, 10):
+                        if self._is_valid_initial_fill(x, y, num):
+                            possible.append(num)
+                    if not possible:
+                        return False
+                    self.current_state[y][x] = random.choice(possible)
+        return True
+
+    def _is_valid_initial_fill(self, x, y, num):
+        # Check row in initial_state (fixed cells)
+        if num in [self.initial_state[y][i] for i in range(9) if self.initial_state[y][i] != 0]:
+            return False
+        # Check column in initial_state (fixed cells)
+        if num in [self.initial_state[i][x] for i in range(9) if self.initial_state[i][x] != 0]:
+            return False
+        # Check box in initial_state (fixed cells)
+        box_x = (x // 3) * 3
+        box_y = (y // 3) * 3
+        for i in range(box_y, box_y + 3):
+            for j in range(box_x, box_x + 3):
+                if self.initial_state[i][j] == num and self.initial_state[i][j] != 0:
+                    return False
+        return True
+
+    def _get_conflicting_cells(self):
+        conflicts = []
+        for y in range(9):
+            for x in range(9):
+                if self.initial_state[y][x] == 0:  # Only check modifiable cells
+                    if not self._validate_sudoku_cell(x, y):
+                        conflicts.append((x, y))
+        return conflicts
+
+    def _get_possible_values(self, x, y):
+        return [num for num in range(1, 10) if self._is_valid_initial_fill(x, y, num)]
+
+    def _count_conflicts(self, x, y):
+        num = self.current_state[y][x]
+        conflicts = 0
+        # Row conflicts
+        conflicts += self.current_state[y].count(num) - 1
+        # Column conflicts
+        column = [self.current_state[i][x] for i in range(9)]
+        conflicts += column.count(num) - 1
+        # Box conflicts
+        box_x = (x // 3) * 3
+        box_y = (y // 3) * 3
+        box = [self.current_state[i][j] for i in range(box_y, box_y+3) for j in range(box_x, box_x+3)]
+        conflicts += box.count(num) - 1
+        return conflicts
+
+    def _is_solved(self):
+        for y in range(9):
+            for x in range(9):
+                if not self._validate_sudoku_cell(x, y):
+                    return False
+        return True
