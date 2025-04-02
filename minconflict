@@ -1,0 +1,68 @@
+import random
+import copy
+from lib.benchmark import time_benchmark
+from lib.Solution import Solution
+
+class MinConflict(Solution):
+    def __init__(self, max_steps=1000):
+        super().__init__()
+        self.max_steps = max_steps
+
+    @time_benchmark
+    def start(self):
+        for i, data in enumerate(self.dataset):
+            self.solve_sudoku(i + 1, data)
+
+    def solve_sudoku(self, id, data):
+        completed, steps = self.min_conflicts_search(data["initial_state"])
+        if completed:
+            self.total_path_length += steps
+            self.total_complete_solve += 1
+            print(f"Sudoku #{id} completed in {steps} steps")
+        else:
+            self.total_incomplete_solve += 1
+            print(f"Sudoku #{id} did not complete in {steps} steps")
+
+    def min_conflicts_search(self, board):
+        board = self.initialize_board(board)
+        for step in range(self.max_steps):
+            conflicted_cells = self.get_conflicted_cells(board)
+            if not conflicted_cells:
+                return True, step 
+
+            
+            x, y = random.choice(conflicted_cells)
+            best_value = self.get_min_conflict_value(board, x, y)
+            board[y][x] = best_value
+        
+        return False, self.max_steps 
+
+    def initialize_board(self, board):
+        new_board = copy.deepcopy(board)
+        for y in range(9):
+            for x in range(9):
+                if new_board[y][x] == 0:
+                    new_board[y][x] = random.randint(1, 9)
+        return new_board
+
+    def get_conflicted_cells(self, board):
+        conflicted_cells = []
+        for y in range(9):
+            for x in range(9):
+                if not self.validate_sudoku_cell(board, x, y):
+                    conflicted_cells.append((x, y))
+        return conflicted_cells
+
+    def get_min_conflict_value(self, board, x, y):
+        best_value = board[y][x]
+        min_conflicts = float('inf')
+        for value in range(1, 10):
+            board[y][x] = value
+            conflicts = sum(not self.validate_sudoku_cell(board, x, y) for _ in range(9))
+            if conflicts < min_conflicts:
+                min_conflicts = conflicts
+                best_value = value
+        return best_value
+
+if __name__ == "__main__":
+    MinConflict().start()
