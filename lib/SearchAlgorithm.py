@@ -1,8 +1,6 @@
-import atexit
 import copy
 import json
 import os
-import concurrent.futures
 import threading
 
 from abc import abstractmethod
@@ -40,7 +38,7 @@ class SearchAlgorithm():
         with cls._threading_lock:
             message = ""
             for problem in cls._problems:
-                message += f"#{problem.id} is {"✅" if problem.completed else "❌"}\n"
+                message += f"Sudoku #{problem.id:<2} : {"✅" if problem.completed else "❌"}\n"
             os.system("cls" if os.name == "nt" else "clear")
             print(message)
 
