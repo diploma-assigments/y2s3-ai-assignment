@@ -41,7 +41,7 @@ class SearchAlgorithm():
             message = ""
             for problem in cls._problems:
                 message += f"#{problem.id} is {"✅" if problem.completed else "❌"}\n"
-            os.system("cls")
+            os.system("cls" if os.name == "nt" else "clear")
             print(message)
 
 
