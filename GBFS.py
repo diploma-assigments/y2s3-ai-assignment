@@ -1,18 +1,12 @@
 from lib.benchmark import time_benchmark
-from lib.Solution import Solution
+from lib.SearchAlgorithm import SearchAlgorithm
 import copy
 import heapq
 
-class GBFS(Solution):
+class GBFS(SearchAlgorithm):
 
-    def __init__(self):
-        super().__init__()
-
-    @time_benchmark
-    def start(self):
-        for i, data in enumerate(self.dataset):
-            self.solve_sudoku(i + 1, data)
-
+    def __init__(self, id, initial_state, goal_state):
+        super().__init__(id, initial_state, goal_state)
 
 
     def solve_sudoku(self, id, data):
@@ -67,6 +61,14 @@ class GBFS(Solution):
         def is_solved(board):
             """ Check if the board is solved (no empty cells) """
             return all(all(cell != 0 for cell in row) for row in board)
+        
+        def compute_heuristic(board):
+            score = 0
+            for y in range(9):
+                for x in range(9):
+                    if board[y][x] == 0:
+                        score += len(_get_valid_values(board, x, y))
+            return score
 
         # Priority queue for GBFS
         queue = []
@@ -93,12 +95,16 @@ class GBFS(Solution):
 
                 if board_tuple not in visited:
                     visited.add(board_tuple)
-                    heuristic_cost = len(valid_values)  # Prioritize cells with fewer choices
-                    heapq.heappush(queue, (heuristic_cost, new_board))
+                    heapq.heappush(queue, (compute_heuristic(new_board), new_board))
 
         return None, step_count  # No solution found
+    
 
-
+def main():
+    sudoku_dataset = GBFS.get_sudoku_dataset()
+    for data in sudoku_dataset:
+        GBFS(data["id"], data["initial_state"], data["goal_state"])
+    GBFS.solve_all()
 
 if __name__ == "__main__":
-    GBFS().start()
+    main()
