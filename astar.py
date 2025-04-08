@@ -1,65 +1,84 @@
 import heapq
 import copy
 from lib.benchmark import time_benchmark
-from lib.Solution import Solution
+from lib.SearchAlgorithm import SearchAlgorithm
 
-## IGNORE
-class AStar(Solution):
-    def __init__(self):
-        super().__init__()
+class AStar(SearchAlgorithm):
+    def __init__(self, id, initial_state, goal_state):
+        super().__init__(id, initial_state, goal_state)
 
-    @time_benchmark
-    def start(self):
-        for i, data in enumerate(self.dataset):
-            self.solve_sudoku(i + 1, data)
-
-    def solve_sudoku(self, id, data):
-        completed, path_length = self.a_star_search(data["initial_state"])
-        if completed:
-            self.total_path_length += path_length
-            self.total_complete_solve += 1
-            print(f"Sudoku #{id} completed with {path_length} steps")
-        else:
-            self.total_incomplete_solve += 1
-            print(f"Sudoku #{id} did not complete with {path_length} steps")
-
-    def a_star_search(self, board):
+    def _search(self):
         def heuristic(board):
-            return sum(row.count(0) for row in board)
+            empty_cells = sum(row.count(0) for row in board)
+            conflicts = 0
+            for y in range(9):
+                for x in range(9):
+                    if board[y][x] != 0:
+                        num = board[y][x]
+                        board[y][x] = 0
+                        if not self._validate_cell_with_board(x, y, board, num):
+                            conflicts += 1
+                        board[y][x] = num
+            return empty_cells + conflicts
 
-        def get_neighbors(board):
-            neighbors = []
-            x, y = self.get_next_empty_cell(board)
-            if x == -1 and y == -1:
-                return neighbors
-            for i in range(1, 10):
-                new_board = copy.deepcopy(board)
-                new_board[y][x] = i
-                if self.validate_sudoku_cell(new_board, x, y):
-                    neighbors.append(new_board)
-            return neighbors
+        def is_goal_state(board):
+            return board == self.goal_state
 
         open_set = []
-        heapq.heappush(open_set, (heuristic(board), 0, board))
-        came_from = {}
-        g_score = {str(board): 0}
-        f_score = {str(board): heuristic(board)}
+        heapq.heappush(open_set, (heuristic(self.current_state), self.current_state))
+        visited = set()
 
         while open_set:
-            _, current_g, current = heapq.heappop(open_set)
-            if heuristic(current) == 0:
-                return True, current_g
+            _, current_board = heapq.heappop(open_set)
 
-            for neighbor in get_neighbors(current):
-                tentative_g_score = current_g + 1
-                neighbor_str = str(neighbor)
-                if tentative_g_score < g_score.get(neighbor_str, float('inf')):
-                    came_from[neighbor_str] = current
-                    g_score[neighbor_str] = tentative_g_score
-                    f_score[neighbor_str] = tentative_g_score + heuristic(neighbor)
-                    heapq.heappush(open_set, (f_score[neighbor_str], tentative_g_score, neighbor))
+            if is_goal_state(current_board):
+                self.completed = True
+                return True
 
-        return False, g_score.get(str(board), 0)
+            board_tuple = tuple(map(tuple, current_board))
+            if board_tuple in visited:
+                continue
+            visited.add(board_tuple)
+
+            x, y = self._get_next_empty_cell_from_board(current_board)
+            if x == -1 and y == -1:
+                continue
+
+            for i in range(1, 10):
+                new_board = copy.deepcopy(current_board)
+                if self._validate_cell_with_board(x, y, new_board, i):
+                    new_board[y][x] = i
+                    heapq.heappush(open_set, (heuristic(new_board), new_board))
+                    self.path_length += 1
+
+        return False
+
+    def _get_next_empty_cell_from_board(self, board):
+        for y in range(9):
+            for x in range(9):
+                if board[y][x] == 0:
+                    return x, y
+        return -1, -1
+
+    def _validate_cell_with_board(self, x, y, board, num):
+        if num in board[y]:
+            return False
+        if num in [board[i][x] for i in range(9)]:
+            return False
+        box_x = (x // 3) * 3
+        box_y = (y // 3) * 3
+        for i in range(box_y, box_y + 3):
+            for j in range(box_x, box_x + 3):
+                if board[i][j] == num:
+                    return False
+        return True
+
+# Main entry point
+def main():
+    sudoku_dataset = AStar.get_sudoku_dataset()
+    for data in sudoku_dataset:
+        AStar(data["id"], data["initial_state"], data["goal_state"])
+    AStar.solve_all()
 
 if __name__ == "__main__":
-    AStar().start()
+    main()
