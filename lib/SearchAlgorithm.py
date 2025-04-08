@@ -2,8 +2,10 @@ import copy
 import json
 import os
 import threading
+import textwrap
 
 from abc import abstractmethod
+from time import time
 
 class SearchAlgorithm():
     _problems: list["SearchAlgorithm"] = [] # TEMP?
@@ -30,15 +32,29 @@ class SearchAlgorithm():
 
     @classmethod
     def _problem_threading_wrapper(cls, problem):
+        start_time = time()
         problem._search()
+        problem.time_seconds_taken = round(time() - start_time, 4)
         cls._print_threading_status()
 
     @classmethod
     def _print_threading_status(cls):
         with cls._threading_lock:
-            message = ""
+            message = textwrap.dedent("""
+            +--------------------------------------------------+
+            | Problem |   Status   | Completeness | Time Taken |
+            +---------+------------+--------------+------------+
+            """)
+            
             for problem in cls._problems:
-                message += f"Sudoku #{problem.id:<2} : {"✅" if problem.completed else "❌"}\n"
+                status = "running..." if problem.time_seconds_taken == 0 else "done!"
+                icon = "✅" if problem.completed else "❌"
+                time_taken = f"{problem.time_seconds_taken}s" if problem.time_seconds_taken else "-"
+
+                message += f"| {problem.id:<7} | {status:<10} | {icon:<11} | {time_taken:<10} |\n"
+
+            message += "+---------+------------+--------------+------------+"
+            
             os.system("cls" if os.name == "nt" else "clear")
             print(message)
 
