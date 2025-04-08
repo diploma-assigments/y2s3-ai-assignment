@@ -49,7 +49,7 @@ class SearchAlgorithm():
             for problem in cls._problems:
                 status = "running..." if problem.time_seconds_taken == 0 else "done!"
                 completeness = "✅" if problem.completed else "❌"
-                time_taken = f"{problem.time_seconds_taken:.4f}s" if problem.time_seconds_taken else "-"
+                time_taken = f"{problem.time_seconds_taken:7.4f}s" if problem.time_seconds_taken else "-"
 
                 message += f"| {problem.id:<7} | {status:<10} | {completeness:<11} | {time_taken:<10} |\n"
 
