@@ -26,12 +26,11 @@ class AStar(SearchAlgorithm):
 
         open_set = []
         heapq.heappush(open_set, (heuristic(self.current_state), self.current_state))
-        ## heapq.heappush(open_set, (heuristic(self.current_state), 0, heuristic(self.current_state), self.current_state))  
+        g_costs = {tuple(map(tuple, self.current_state)): 0}  # Store g(n) separately
         visited = set()
 
         while open_set:
             _, current_board = heapq.heappop(open_set)
-            ##_, g_cost, _, current_board = heapq.heappop(open_set)
 
             if is_goal_state(current_board):
                 self.completed = True
@@ -50,19 +49,10 @@ class AStar(SearchAlgorithm):
                 new_board = copy.deepcopy(current_board)
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
-                    heapq.heappush(open_set, (heuristic(new_board), new_board))
+                    f_val = heuristic(new_board) + g_costs[board_tuple] + 1  # f(n) = g(n) + h(n)
+                    heapq.heappush(open_set, (f_val, new_board))
+                    g_costs[tuple(map(tuple, new_board))] = g_costs[board_tuple] + 1
                     self.path_length += 1
-
-            ## for i in range(1, 10):
-            ##    new_board = copy.deepcopy(current_board)
-            ##    if self._validate_cell_with_board(x, y, new_board, i):
-            ##        new_board[y][x] = i
-            ##        g_new = g_cost + 1  
-            ##        h_new = heuristic(new_board)  
-            ##        f_new = g_new + h_new  # f(n) = g(n) + h(n)
-            ##        heapq.heappush(open_set, (f_new, g_new, h_new, new_board))
-            ##        self.path_length += 1
-
 
         return False
 

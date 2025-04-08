@@ -1,7 +1,7 @@
-from lib.benchmark import time_benchmark
-from lib.SearchAlgorithm import SearchAlgorithm
 import copy
 import heapq
+from lib.benchmark import time_benchmark
+from lib.SearchAlgorithm import SearchAlgorithm
 
 class GBFS(SearchAlgorithm):
     def __init__(self, id, initial_state, goal_state):
@@ -25,13 +25,13 @@ class GBFS(SearchAlgorithm):
             return board == self.goal_state
 
         open_set = []
-        ## heapq.heappush(open_set, (heuristic(self.current_state), self.current_state))
-        heapq.heappush(open_set, (heuristic(self.current_state), 0, heuristic(self.current_state), self.current_state))  
+        # Initially, we push only h(n) (heuristic) in the open set
+        heapq.heappush(open_set, (heuristic(self.current_state), self.current_state))
         visited = set()
 
         while open_set:
-            ##_, current_board = heapq.heappop(open_set)
-            _, g_cost, _, current_board = heapq.heappop(open_set)
+            # We pop only the heuristic value and the board, no need to store g(n) or f(n)
+            _, current_board = heapq.heappop(open_set)
 
             if is_goal_state(current_board):
                 self.completed = True
@@ -46,32 +46,24 @@ class GBFS(SearchAlgorithm):
             if x == -1 and y == -1:
                 continue
 
-            ##for i in range(1, 10):
-            ##    new_board = copy.deepcopy(current_board)
-            ##    if self._validate_cell_with_board(x, y, new_board, i):
-            ##        new_board[y][x] = i
-            ##        heapq.heappush(open_set, (heuristic(new_board), new_board))
-            ##        self.path_length += 1
-
+            # For each possible number, create new board states and add them to open set
             for i in range(1, 10):
-               new_board = copy.deepcopy(current_board)
-               if self._validate_cell_with_board(x, y, new_board, i):
-                   new_board[y][x] = i
-                   g_new = g_cost + 1  
-                   h_new = heuristic(new_board)  
-                   f_new = g_new + h_new  # f(n) = g(n) + h(n)
-                   heapq.heappush(open_set, (f_new, g_new, h_new, new_board))
-                   self.path_length += 1
+                new_board = copy.deepcopy(current_board)
+                if self._validate_cell_with_board(x, y, new_board, i):
+                    new_board[y][x] = i
+                    # Push only the heuristic value to the open set, no g(n) or f(n)
+                    heapq.heappush(open_set, (heuristic(new_board), new_board))
+                    self.path_length += 1
 
         return False
-    
+
     def _get_next_empty_cell_from_board(self, board):
         for y in range(9):
             for x in range(9):
                 if board[y][x] == 0:
                     return x, y
         return -1, -1
-    
+
     def _validate_cell_with_board(self, x, y, board, num):
         if num in board[y]:
             return False
