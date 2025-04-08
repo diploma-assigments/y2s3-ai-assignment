@@ -9,96 +9,76 @@ class GBFS(SearchAlgorithm):
         super().__init__(id, initial_state, goal_state)
 
 
-    def solve_sudoku(self, id, data):
-        completed, path_length = self._GBFS(data["initial_state"])
-        if completed:
-            self.total_path_length += path_length
-            self.total_complete_solve += 1
-            print(f"Sudoku #{id} completed with {path_length} steps")
-        else:
-            self.total_incomplete_solve += 1
-            print(f"Sudoku #{id} did not complete with {path_length} steps")
-    
+    def _search(self):
 
-
-    def _GBFS(self, board):
-        """ Greedy Best-First Search for Sudoku with proper heuristic """
-
-        def _get_valid_values(board, x, y):
-            """ Get valid numbers for a given cell """
-            used = set(board[y])  # Row values
-            used.update(board[i][x] for i in range(9))  # Column values
-
-            # 3x3 Grid values
-            box_x, box_y = (x // 3) * 3, (y // 3) * 3
-            for i in range(3):
-                for j in range(3):
-                    used.add(board[box_y + i][box_x + j])
-
-            return [num for num in range(1, 10) if num not in used]
-
-
-
-        def _find_best_empty_cell(board):
-            """ Find the empty cell with the fewest possible valid numbers (heuristic) """
-            min_options = float('inf')
-            best_cell = (-1, -1)
-            best_values = []
-
-            for y in range(9):
-                for x in range(9):
-                    if board[y][x] == 0:  # Empty cell
-                        possible_values = _get_valid_values(board, x, y)
-                        if len(possible_values) < min_options:
-                            min_options = len(possible_values)
-                            best_cell = (x, y)
-                            best_values = possible_values
-
-            return best_cell, best_values
-
-
-
-        def is_solved(board):
-            """ Check if the board is solved (no empty cells) """
-            return all(all(cell != 0 for cell in row) for row in board)
         
-        def compute_heuristic(board):
-            score = 0
+        def heuristic(board):
+            empty_cells = sum(row.count(0) for row in board)
+            conflicts = 0
             for y in range(9):
                 for x in range(9):
-                    if board[y][x] == 0:
-                        score += len(_get_valid_values(board, x, y))
-            return score
-
-        # Priority queue for GBFS
-        queue = []
-        heapq.heappush(queue, (0, board))  # Start with initial state (priority=0)
-
-        visited = set()
-        step_count = 0
-
-        while queue:
-            _, current_board = heapq.heappop(queue)  # Get the best heuristic state
-            step_count += 1
-
-            if is_solved(current_board):
-                return current_board, step_count  # Solution found
-
-            (x, y), valid_values = _find_best_empty_cell(current_board)
-            if x == -1:
-                continue  # No more moves
-
-            for value in valid_values:
-                new_board = copy.deepcopy(current_board)
-                new_board[y][x] = value
-                board_tuple = tuple(map(tuple, new_board))  # Convert to hashable type
-
-                if board_tuple not in visited:
-                    visited.add(board_tuple)
-                    heapq.heappush(queue, (compute_heuristic(new_board), new_board))
-
-        return None, step_count  # No solution found
+                    if board[y][x] != 0:
+                        num = board[y][x]
+                        board[y][x] = 0
+                        if not self._validate_cell_with_board(x, y, board, num):
+                            conflicts += 1
+                        board[y][x] = num
+            return empty_cells + conflicts
     
+        def is_goal_state(board):
+            return board == self.goal_state
+    
+
+        open_set = []
+        heapq.heappush(open_set, (heuristic(self.current_state), self.current_state))
+        visited = set()
+    
+        while open_set:
+            _, current_board = heapq.heappop(open_set)
+    
+            if is_goal_state(current_board):
+                self.completed = True
+                return True
+    
+            board_tuple = tuple(map(tuple, current_board))
+            if board_tuple in visited:
+                continue
+            visited.add(board_tuple)
+    
+            x, y = self._get_next_empty_cell_from_board(current_board)
+            if x == -1 and y == -1:
+                continue
+    
+            for i in range(1, 10):
+                new_board = copy.deepcopy(current_board)
+                if self._validate_cell_with_board(x, y, new_board, i):
+                    new_board[y][x] = i
+                    heapq.heappush(open_set, (heuristic(new_board), new_board))
+                    self.path_length += 1
+    
+        return False
+    
+
+    def _get_next_empty_cell_from_board(self, board):
+        for y in range(9):
+            for x in range(9):
+                if board[y][x] == 0:
+                    return x, y
+        return -1, -1
+    
+
+    def _validate_cell_with_board(self, x, y, board, num):
+        if num in board[y]:
+            return False
+        if num in [board[i][x] for i in range(9)]:
+            return False
+        box_x = (x // 3) * 3
+        box_y = (y // 3) * 3
+        for i in range(box_y, box_y + 3):
+            for j in range(box_x, box_x + 3):
+                if board[i][j] == num:
+                    return False
+        return True
 
 def main():
     sudoku_dataset = GBFS.get_sudoku_dataset()
