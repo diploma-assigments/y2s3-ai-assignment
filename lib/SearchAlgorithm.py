@@ -48,10 +48,10 @@ class SearchAlgorithm():
             
             for problem in cls._problems:
                 status = "running..." if problem.time_seconds_taken == 0 else "done!"
-                icon = "✅" if problem.completed else "❌"
+                completeness = "✅" if problem.completed else "❌"
                 time_taken = f"{problem.time_seconds_taken}s" if problem.time_seconds_taken else "-"
 
-                message += f"| {problem.id:<7} | {status:<10} | {icon:<11} | {time_taken:<10} |\n"
+                message += f"| {problem.id:<7} | {status:<10} | {completeness:<11} | {time_taken:<10} |\n"
 
             message += "+---------+------------+--------------+------------+"
             
