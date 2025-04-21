@@ -11,6 +11,7 @@ class SearchAlgorithm():
     _problems: list["SearchAlgorithm"] = [] # TEMP?
     _problems_finished: int = 0
     _problems_finished_total_time_taken: float = 0
+    _problem_finished_total_path_length: int = 0
     _threads = []
     _threading_lock = threading.Lock()
 
@@ -38,9 +39,10 @@ class SearchAlgorithm():
         problem._search()
         problem.time_seconds_taken = round(time() - start_time, 4)
 
-        # for average time taken calculation
+        # for average calculation
         cls._problems_finished += 1
         cls._problems_finished_total_time_taken += problem.time_seconds_taken
+        cls._problem_finished_total_path_length += problem.path_length
 
         cls._print_threading_status()
 
@@ -48,22 +50,24 @@ class SearchAlgorithm():
     def _print_threading_status(cls):
         with cls._threading_lock:
             message = textwrap.dedent("""
-            +--------------------------------------------------+
-            | Problem |   Status   | Completeness | Time Taken |
-            +---------+------------+--------------+------------+
+            +--------------------------------------------------+-------------+
+            | Problem |   Status   | Completeness | Time Taken | Path Length |
+            +---------+------------+--------------+------------+-------------+
             """)
             
             for problem in cls._problems:
                 status = "running..." if problem.time_seconds_taken == 0 else "done!"
                 completeness = "✅" if problem.completed else "❌"
                 time_taken = f"{problem.time_seconds_taken:7.4f}s" if problem.time_seconds_taken else "-"
+                path_length = problem.path_length if problem.completed else "-"
 
-                message += f"| {problem.id:<7} | {status:<10} | {completeness:<11} | {time_taken:<10} |\n"
+                message += f"| {problem.id:<7} | {status:<10} | {completeness:<11} | {time_taken:<10} | {path_length:<11} |\n"
 
             message += textwrap.dedent(f"""
-            +---------+------------+--------------+------------+
-            Average time taken (out of {cls._problems_finished}): {cls._problems_finished_total_time_taken / cls._problems_finished:.4f}s
-            """)
+            +---------+------------+--------------+------------+-------------+
+            Average time taken (out of {cls._problems_finished}): {cls._problems_finished_total_time_taken / cls._problems_finished:.4f} seconds
+            Average path length (out of {cls._problems_finished}): {cls._problem_finished_total_path_length / cls._problems_finished:.2f} steps
+            """).strip()
             
             os.system("cls" if os.name == "nt" else "clear")
             print(message)
