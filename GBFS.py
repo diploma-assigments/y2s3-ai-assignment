@@ -24,12 +24,12 @@ class GBFS(SearchAlgorithm):
             return board == self.goal_state
 
         open_set = []
-        # Initially, we push only h(n) (heuristic) in the open set
+        # we push only h(n) (heuristic) in the open set
         heapq.heappush(open_set, (heuristic(self.current_state), self.current_state))
         visited = set()
 
         while open_set:
-            # We pop only the heuristic value and the board, no need to store g(n) or f(n)
+            # We pop only the heuristic value h(n) and the board
             _, current_board = heapq.heappop(open_set)
 
             if is_goal_state(current_board):
@@ -47,11 +47,13 @@ class GBFS(SearchAlgorithm):
 
             # For each possible number, create new board states and add them to open set
             for i in range(1, 10):
-                self.path_length += 1  # Count all number attempts
                 new_board = copy.deepcopy(current_board)
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
-                    heapq.heappush(open_set, (heuristic(new_board), new_board))
+                    # Push only the heuristic value to the open set modified
+                    f_val = heuristic(new_board) # f(n) = h(n) should be ok already dy
+                    heapq.heappush(open_set, (f_val, new_board))
+                    self.path_length += 1
 
         return False
 
