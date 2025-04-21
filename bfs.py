@@ -1,6 +1,5 @@
 import copy
 
-from lib.benchmark import time_benchmark
 from lib.SearchAlgorithm import SearchAlgorithm
 
 class BFS(SearchAlgorithm):
