@@ -51,8 +51,8 @@ class GBFS(SearchAlgorithm):
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
                     # Push only the heuristic value to the open set modified
-                    f_val = heuristic(new_board) # f(n) = h(n) should be ok already dy
-                    heapq.heappush(open_set, (f_val, new_board))
+                    fn = heuristic(new_board) # f(n) = h(n) should be ok already dy
+                    heapq.heappush(open_set, (fn, new_board))
                     self.path_length += 1
 
         return False
