@@ -9,6 +9,8 @@ from time import time
 
 class SearchAlgorithm():
     _problems: list["SearchAlgorithm"] = [] # TEMP?
+    _problems_finished: int = 0
+    _problems_finished_total_time_taken: float = 0
     _threads = []
     _threading_lock = threading.Lock()
 
@@ -35,6 +37,11 @@ class SearchAlgorithm():
         start_time = time()
         problem._search()
         problem.time_seconds_taken = round(time() - start_time, 4)
+
+        # for average time taken calculation
+        cls._problems_finished += 1
+        cls._problems_finished_total_time_taken += problem.time_seconds_taken
+
         cls._print_threading_status()
 
     @classmethod
@@ -53,7 +60,10 @@ class SearchAlgorithm():
 
                 message += f"| {problem.id:<7} | {status:<10} | {completeness:<11} | {time_taken:<10} |\n"
 
-            message += "+---------+------------+--------------+------------+"
+            message += textwrap.dedent(f"""
+            +---------+------------+--------------+------------+
+            Average time taken (out of {cls._problems_finished}): {cls._problems_finished_total_time_taken / cls._problems_finished:.4f}s
+            """)
             
             os.system("cls" if os.name == "nt" else "clear")
             print(message)
