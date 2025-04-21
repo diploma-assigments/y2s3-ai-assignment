@@ -1,7 +1,7 @@
 from lib.benchmark import time_benchmark
 from lib.SearchAlgorithm import SearchAlgorithm
 
-class DFS(SearchAlgorithm):
+class BacktrackingSearch(SearchAlgorithm):
     def __init__(self, id, initial_state, goal_state):
         super().__init__(id, initial_state, goal_state)
 
@@ -38,11 +38,11 @@ class DFS(SearchAlgorithm):
 
 
 def main():
-    sudoku_dataset = DFS.get_sudoku_dataset()
+    sudoku_dataset = BacktrackingSearch.get_sudoku_dataset()
     for data in sudoku_dataset:
-        DFS(data["id"], data["initial_state"], data["goal_state"])
+        BacktrackingSearch(data["id"], data["initial_state"], data["goal_state"])
 
-    DFS.solve_all()
+    BacktrackingSearch.solve_all()
 
 
 if __name__ == "__main__":
