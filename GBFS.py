@@ -1,6 +1,5 @@
 import copy
 import heapq
-from lib.benchmark import time_benchmark
 from lib.SearchAlgorithm import SearchAlgorithm
 
 class GBFS(SearchAlgorithm):
@@ -48,12 +47,11 @@ class GBFS(SearchAlgorithm):
 
             # For each possible number, create new board states and add them to open set
             for i in range(1, 10):
+                self.path_length += 1  # Count all number attempts
                 new_board = copy.deepcopy(current_board)
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
-                    # Push only the heuristic value to the open set, no g(n) or f(n)
                     heapq.heappush(open_set, (heuristic(new_board), new_board))
-                    self.path_length += 1
 
         return False
 

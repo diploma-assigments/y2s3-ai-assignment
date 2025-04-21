@@ -1,6 +1,5 @@
 import heapq
 import copy
-from lib.benchmark import time_benchmark
 from lib.SearchAlgorithm import SearchAlgorithm
 
 class AStar(SearchAlgorithm):
@@ -46,13 +45,13 @@ class AStar(SearchAlgorithm):
                 continue
 
             for i in range(1, 10):
+                self.path_length += 1  # Increment on every number tried
                 new_board = copy.deepcopy(current_board)
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
-                    f_val = heuristic(new_board) + g_costs[board_tuple] + 1  # f(n) = g(n) + h(n)
+                    f_val = heuristic(new_board) + g_costs[board_tuple] + 1
                     heapq.heappush(open_set, (f_val, new_board))
                     g_costs[tuple(map(tuple, new_board))] = g_costs[board_tuple] + 1
-                    self.path_length += 1
 
         return False
 
