@@ -3,8 +3,11 @@ import heapq
 from lib.SearchAlgorithm import SearchAlgorithm
 
 class GBFS(SearchAlgorithm):
+
+
     def __init__(self, id, initial_state, goal_state):
         super().__init__(id, initial_state, goal_state)
+
 
     def _search(self):
         def heuristic(board):
@@ -48,15 +51,16 @@ class GBFS(SearchAlgorithm):
             # For each possible number, create new board states and add them to open set
             for i in range(1, 10):
                 new_board = copy.deepcopy(current_board)
+                self.path_length += 1
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
                     # Push only the heuristic value to the open set modified
                     fn = heuristic(new_board) # f(n) = h(n) should be ok already dy
                     heapq.heappush(open_set, (fn, new_board))
-                    self.path_length += 1
+                    
 
         return False
-
+    
     def _get_next_empty_cell_from_board(self, board):
         for y in range(9):
             for x in range(9):
@@ -76,6 +80,7 @@ class GBFS(SearchAlgorithm):
                 if board[i][j] == num:
                     return False
         return True
+
 
 def main():
     sudoku_dataset = GBFS.get_sudoku_dataset()
