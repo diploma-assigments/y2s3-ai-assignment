@@ -45,13 +45,18 @@ class AStar(SearchAlgorithm):
                 continue
 
             for i in range(1, 10):
-                self.path_length += 1  # Increment on every number tried
+                self.path_length += 1  # Increment on every number tried, valid or invalid
                 new_board = copy.deepcopy(current_board)
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
-                    f_val = heuristic(new_board) + g_costs[board_tuple] + 1
-                    heapq.heappush(open_set, (f_val, new_board))
-                    g_costs[tuple(map(tuple, new_board))] = g_costs[board_tuple] + 1
+                    new_g_cost = g_costs[board_tuple] + 1  # New g(n)
+
+                    # If this new state has a lower g(n), update it
+                    new_board_tuple = tuple(map(tuple, new_board))
+                    if new_board_tuple not in g_costs or new_g_cost < g_costs[new_board_tuple]:
+                        g_costs[new_board_tuple] = new_g_cost
+                        f_val = heuristic(new_board) + new_g_cost
+                        heapq.heappush(open_set, (f_val, new_board))
 
         return False
 
