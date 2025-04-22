@@ -51,12 +51,12 @@ class GBFS(SearchAlgorithm):
             # For each possible number, create new board states and add them to open set
             for i in range(1, 10):
                 new_board = copy.deepcopy(current_board)
-                self.path_length += 1
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
                     # Push only the heuristic value to the open set modified
                     fn = heuristic(new_board) # f(n) = h(n) should be ok already dy
                     heapq.heappush(open_set, (fn, new_board))
+                    self.path_length += 1 # debugged by moving path incrementation into if statement (so ts only count the valid transition)
                     
 
         return False
