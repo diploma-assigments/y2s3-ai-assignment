@@ -88,15 +88,16 @@ class SimulatedAnnealing(SearchAlgorithm):
         current_energy = self._calculate_energy(self.current_state)
         T = initial_temp
         stuck_count = 0
+        self.path_length = 0
 
         # Precompute cooling schedule cutoff
         geo_cutoff = int(max_iter * 0.8)
         linear_rate = initial_temp / (max_iter - geo_cutoff)
 
-        for i in range(1, max_iter + 1):
-            # Check goal
-            if current_energy <= target:
-                break
+        # Loop until max iterations or solution found
+        while self.path_length < max_iter and current_energy > target:
+            self.path_length += 1
+            i = self.path_length
 
             # Smart reheating
             if stuck_count > stuck_thresh or T < 1e-5:
@@ -129,7 +130,6 @@ class SimulatedAnnealing(SearchAlgorithm):
             if delta > 0 or math.exp(delta / T) > random.random():
                 self.current_state, current_energy = neighbor, e_n
                 stuck_count = 0
-                # update best
                 if current_energy < self.best_energy:
                     self.best_energy = current_energy
                     self.best_state = copy.deepcopy(self.current_state)
@@ -144,7 +144,6 @@ class SimulatedAnnealing(SearchAlgorithm):
 
             # Diagnostics
             if i % 500_000 == 0:
-                # corrected formatting: simple f-string
                 print(f"Iter {i:,}: E={current_energy}, best={self.best_energy}, T={T:.2e}")
 
         # Finalize
