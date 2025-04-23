@@ -1,74 +1,64 @@
-import copy
 import heapq
+import copy
 from lib.SearchAlgorithm import SearchAlgorithm
 
 class GBFS(SearchAlgorithm):
-
-
     def __init__(self, id, initial_state, goal_state):
         super().__init__(id, initial_state, goal_state)
 
-
     def _search(self):
         def heuristic(board):
-            empty_cells = sum(row.count(0) for row in board)
-            conflicts = 0
+            total_options = 0
             for y in range(9):
                 for x in range(9):
-                    if board[y][x] != 0:
-                        num = board[y][x]
-                        board[y][x] = 0
-                        if not self._validate_cell_with_board(x, y, board, num):
-                            conflicts += 1
-                        board[y][x] = num
-            return empty_cells + conflicts
+                    if board[y][x] == 0:
+                        options = 0
+                        for num in range(1, 10):
+                            if self._validate_cell_with_board(x, y, board, num):
+                                options += 1
+                        total_options += options
+            return total_options
 
         def is_goal_state(board):
             return board == self.goal_state
 
         open_set = []
-        # we push only h(n) (heuristic) in the open set
         heapq.heappush(open_set, (heuristic(self.current_state), self.current_state))
-        visited = set()
 
         while open_set:
-            # We pop only the heuristic value h(n) and the board
             _, current_board = heapq.heappop(open_set)
 
             if is_goal_state(current_board):
                 self.completed = True
                 return True
 
-            board_tuple = tuple(map(tuple, current_board))
-            if board_tuple in visited:
-                continue
-            visited.add(board_tuple)
-
-            x, y = self._get_next_empty_cell_from_board(current_board)
+            x, y = self._get_mrv_cell(current_board)
             if x == -1 and y == -1:
                 continue
 
-            # For each possible number, create new board states and add them to open set
             for i in range(1, 10):
                 self.path_length += 1
-                # Increment on every number tried, valid or invalid
                 new_board = copy.deepcopy(current_board)
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
-                    # Push only the heuristic value to the open set modified
-                    fn = heuristic(new_board) # f(n) = h(n) should be ok already dy
-                    heapq.heappush(open_set, (fn, new_board))
-                    # self.path_length += 1 # debugged by moving path incrementation into if statement (so ts only count the valid transition)
-                    
+                    heapq.heappush(open_set, (heuristic(new_board), new_board))
 
         return False
-    
-    def _get_next_empty_cell_from_board(self, board):
+
+    def _get_mrv_cell(self, board):
+        min_options = 10
+        best_cell = (-1, -1)
         for y in range(9):
             for x in range(9):
                 if board[y][x] == 0:
-                    return x, y
-        return -1, -1
+                    options = 0
+                    for num in range(1, 10):
+                        if self._validate_cell_with_board(x, y, board, num):
+                            options += 1
+                    if 0 < options < min_options:
+                        min_options = options
+                        best_cell = (x, y)
+        return best_cell
 
     def _validate_cell_with_board(self, x, y, board, num):
         if num in board[y]:
@@ -82,7 +72,6 @@ class GBFS(SearchAlgorithm):
                 if board[i][j] == num:
                     return False
         return True
-
 
 def main():
     sudoku_dataset = GBFS.get_sudoku_dataset()

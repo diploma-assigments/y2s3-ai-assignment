@@ -8,25 +8,34 @@ class AStar(SearchAlgorithm):
 
     def _search(self):
         def heuristic(board):
-            empty_cells = sum(row.count(0) for row in board)
-            conflicts = 0
+            total_options = 0
             for y in range(9):
                 for x in range(9):
-                    if board[y][x] != 0:
-                        num = board[y][x]
-                        board[y][x] = 0
-                        if not self._validate_cell_with_board(x, y, board, num):
-                            conflicts += 1
-                        board[y][x] = num
-            return empty_cells + conflicts
+                    if board[y][x] == 0:
+                        options = 0
+                        for num in range(1, 10):
+                            if self._validate_cell_with_board(x, y, board, num):
+                                options += 1
+                        total_options += options
+            return total_options
 
         def is_goal_state(board):
             return board == self.goal_state
 
+        def get_mrv(board):
+            # Create a list of empty cells and calculate the MRV (minimum remaining values)
+            empty_cells = []
+            for y in range(9):
+                for x in range(9):
+                    if board[y][x] == 0:
+                        valid_values = self._get_valid_values(x, y, board)
+                        empty_cells.append((x, y, len(valid_values)))
+            # Sort by MRV (fewest valid values first)
+            return sorted(empty_cells, key=lambda x: x[2])
+
         open_set = []
         heapq.heappush(open_set, (heuristic(self.current_state), self.current_state))
-        g_costs = {tuple(map(tuple, self.current_state)): 0}  # Store g(n) separately
-        visited = set()
+        g_costs = {tuple(map(tuple, self.current_state)): 0}
 
         while open_set:
             _, current_board = heapq.heappop(open_set)
@@ -35,24 +44,25 @@ class AStar(SearchAlgorithm):
                 self.completed = True
                 return True
 
-            board_tuple = tuple(map(tuple, current_board))
-            if board_tuple in visited:
-                continue
-            visited.add(board_tuple)
+            # Get the empty cells ordered by MRV
+            empty_cells_by_mrv = get_mrv(current_board)
 
-            x, y = self._get_next_empty_cell_from_board(current_board)
-            if x == -1 and y == -1:
-                continue
+            # If there are empty cells to process, pick the one with the least valid options (MRV)
+            if empty_cells_by_mrv:
+                x, y, _ = empty_cells_by_mrv[0]  # Take the cell with the least options
+            else:
+                continue  # No empty cells, just continue (though this shouldn't happen here)
 
             for i in range(1, 10):
-                self.path_length += 1  # Increment on every number tried, valid or invalid
+                self.path_length += 1
                 new_board = copy.deepcopy(current_board)
                 if self._validate_cell_with_board(x, y, new_board, i):
                     new_board[y][x] = i
-                    new_g_cost = g_costs[board_tuple] + 1  # New g(n)
-
-                    # If this new state has a lower g(n), update it
+                    options = len(self._get_valid_values(x, y, current_board))
+                    new_g_cost = g_costs[tuple(map(tuple, current_board))] + (options / 9)
+                    # new_g_cost = g_costs[tuple(map(tuple, current_board))] + 1.0 + (sum(row.count(0) for row in current_board) / 81)
                     new_board_tuple = tuple(map(tuple, new_board))
+
                     if new_board_tuple not in g_costs or new_g_cost < g_costs[new_board_tuple]:
                         g_costs[new_board_tuple] = new_g_cost
                         f_val = heuristic(new_board) + new_g_cost
@@ -60,7 +70,16 @@ class AStar(SearchAlgorithm):
 
         return False
 
+    def _get_valid_values(self, x, y, board):
+        # Returns a list of valid values (1-9) for the cell (x, y)
+        valid_values = []
+        for num in range(1, 10):
+            if self._validate_cell_with_board(x, y, board, num):
+                valid_values.append(num)
+        return valid_values
+
     def _get_next_empty_cell_from_board(self, board):
+        # Now unused since MRV is taking over the cell selection
         for y in range(9):
             for x in range(9):
                 if board[y][x] == 0:
