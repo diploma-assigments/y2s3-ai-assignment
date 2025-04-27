@@ -78,14 +78,6 @@ class AStar(SearchAlgorithm):
                 valid_values.append(num)
         return valid_values
 
-    def _get_next_empty_cell_from_board(self, board):
-        # Now unused since MRV is taking over the cell selection
-        for y in range(9):
-            for x in range(9):
-                if board[y][x] == 0:
-                    return x, y
-        return -1, -1
-
     def _validate_cell_with_board(self, x, y, board, num):
         if num in board[y]:
             return False
